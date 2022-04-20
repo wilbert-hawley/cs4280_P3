@@ -1,0 +1,6 @@
+## p2g2 ##
+declare x := whole ;
+main
+{
+listen x ;
+}
