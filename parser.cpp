@@ -18,19 +18,19 @@ void printTree(Node* tree, int depth) {
         string output = "";
         cout << output.append(depth * 2, ' ') << tree->label << endl;
         if(tree->tok1.instance != "") {
-            cout << output.append(depth * 2, ' ') << "TokenID: " << tokenNames[tree->tok1.tk] << " TokenInstance: "
+            cout << output << "TokenID: " << tokenNames[tree->tok1.tk] << " TokenInstance: "
                  << tree->tok1.instance << " LineNumber: " << tree->tok1.line << endl;
             if (tree->tok2.instance != "") {
-                cout << output.append(depth * 2, ' ') << "TokenID: " << tokenNames[tree->tok2.tk]
+                cout << output << "TokenID: " << tokenNames[tree->tok2.tk]
                      << " TokenInstance: " << tree->tok2.instance << " LineNumber: " << tree->tok2.line << endl;
                 if (tree->tok3.instance != "") {
-                    cout << output.append(depth * 2, ' ') << "TokenID: " << tokenNames[tree->tok3.tk]
+                    cout << output << "TokenID: " << tokenNames[tree->tok3.tk]
                          << " TokenInstance: " << tree->tok3.instance << " LineNumber: " << tree->tok3.line << endl;
                     if (tree->tok4.instance != "") {
-                        cout << output.append(depth * 2, ' ') << "TokenID: " << tokenNames[tree->tok4.tk]
+                        cout << output << "TokenID: " << tokenNames[tree->tok4.tk]
                              << " TokenInstance: " << tree->tok4.instance << " LineNumber: " << tree->tok4.line << endl;
                         if (tree->tok5.instance != "") {
-                            cout << output.append(depth * 2, ' ') << "TokenID: " << tokenNames[tree->tok5.tk]
+                            cout << output << "TokenID: " << tokenNames[tree->tok5.tk]
                                  << " TokenInstance: " << tree->tok5.instance << " LineNumber: " << tree->tok5.line << endl;
                         }
                     }
@@ -68,7 +68,7 @@ Node* parser(fstream& file) {
 //<program> -> <vars> main <block>
 Node* program_(fstream &file){
     //cout << "Entering program_()\n";
-    Node* newNode = getNode("<program>");
+    Node* newNode = getNode("<program>", PROGRAM);
     newNode->child1 = vars_(file);
 	if(tok.tk == MAIN_tk) {
 	    //cout << "Found MAIN_tk\n";
@@ -87,7 +87,7 @@ Node* block_(fstream& file) {
     //cout << "Entering block_()\n";
     if(tok.tk == LCURLY_tk) {
         //cout << "Found LCURLY_tk in block_()\n";
-        Node* newNode = getNode("<block>");
+        Node* newNode = getNode("<block>", BLOCK);
         tok = scanner(file, lineNumber, nextChar);
         newNode->child1 = vars_(file);
         newNode->child2 = stats_(file);
@@ -97,13 +97,13 @@ Node* block_(fstream& file) {
             return newNode;
         } else parse_error();
     } else parse_error();
-    return getNode("ERROR: block_()");
+    return getNode("ERROR: block_()", ERROR);
 }
 
 //<vars> -> empty | declare Identifier :=  whole ; <vars>
 Node* vars_(fstream& file) {
     //cout << "Entering vars()\n";
-    Node* newNode = getNode("<vars>");
+    Node* newNode = getNode("<vars>", VARS);
     if(tok.tk == DECLARE_tk) {
         //cout << "Found declare in vars()\n";
         newNode->tok1 = tok;
@@ -135,7 +135,7 @@ Node* vars_(fstream& file) {
         //cout << "Returning empty <vars>\n";
         return newNode;
     }
-    return getNode("ERROR vars_");
+    return getNode("ERROR vars_", ERROR);
 }
 
 /*enum tokenID {
@@ -149,7 +149,7 @@ Node* vars_(fstream& file) {
 
 // <expr> -> <N> - <expr> | <N>
 Node* expr_(fstream& file) {
-    Node* newNode = getNode("<expr>");
+    Node* newNode = getNode("<expr>", EXPR);
     //cout << "Entering expr_()\n";
     newNode->child1 = N_(file);
 
@@ -191,7 +191,7 @@ void N1_(fstream& file) {
 // N -> <A> / <N> | <A> + <N> | <A>
 Node* N_(fstream& file) {
     //cout << "Entering N_()\n";
-    Node* newNode = getNode("<N>");
+    Node* newNode = getNode("<N>", N);
     newNode->child1 = A_(file);
     if(tok.tk == SLASH_tk) {
         //cout << "Found SLAHS_tk in N()\n";
@@ -213,7 +213,7 @@ Node* N_(fstream& file) {
 // <A> -> <M> * <A> | <M>
 Node* A_(fstream& file) {
     //cout << "Entering A_()\n";
-    Node* newNode = getNode("<A>");
+    Node* newNode = getNode("<A>", A);
     newNode->child1 = M_(file);
     if(tok.tk == MULT_tk) {
         //cout << "Found MULT_tk in A_()\n";
@@ -227,7 +227,7 @@ Node* A_(fstream& file) {
 // <M> -> % <M> |  <R>
 Node* M_(fstream& file) {
     //cout << "Entering M_()\n";
-    Node* newNode = getNode("<M>");
+    Node* newNode = getNode("<M>", M);
     if(tok.tk == MOD_tk) {
         //cout << "Found MOD_tk in M_()\n";
         newNode->tok1 = tok;
@@ -243,7 +243,7 @@ Node* M_(fstream& file) {
 // <R> -> ( <expr> ) | Identifier | Integer
 Node* R_(fstream& file) {
     //cout << "Entering R_()\n";
-    Node* newNode = getNode("<R>");
+    Node* newNode = getNode("<R>", R);
     if(tok.tk == LPARA_tk) {
         //cout << "Found LPARA_tk in R_()\n";
         tok = scanner(file, lineNumber, nextChar);
@@ -251,7 +251,7 @@ Node* R_(fstream& file) {
         if(tok.tk == RPARA_tk) {
             //cout << "Found RPARA_tk in R_()\n";
             tok = scanner(file, lineNumber, nextChar);
-            return NULL;
+            return newNode;
         } else parse_error();
     } else if(tok.tk == ID_tk) {
         //cout << "Found ID_tk in R_()\n";
@@ -265,13 +265,13 @@ Node* R_(fstream& file) {
         return newNode;
     } else parse_error();
 
-    return getNode("ERROR R_()");
+    return getNode("ERROR R_()", ERROR);
 }
 
 // <stats> -> <stat>  <mStat>
 Node* stats_(fstream& file) {
     //cout << "Entering stats_()\n";
-    Node* newNode = getNode("<stats>");
+    Node* newNode = getNode("<stats>", STATS);
     newNode->child1 = stat_(file);
     newNode->child2 = mStat_(file);
     return newNode;
@@ -280,7 +280,7 @@ Node* stats_(fstream& file) {
 // <mStat> -> empty |  <stat>  <mStat>
 Node* mStat_(fstream& file) {
     //cout << "Entering mStat()\n";
-    Node* newNode = getNode("<mStat>");
+    Node* newNode = getNode("<mStat>", MSTAT);
     switch(tok.tk) {
         case LISTEN_tk: // in
             break;
@@ -309,7 +309,7 @@ Node* mStat_(fstream& file) {
 // <stat> -> <in> ; | <out> ; | <block> | <if> ; | <loop1> ; | <loop2> ; | <assign> ; | <goto> ; | <label> ;
 Node* stat_(fstream& file) {
     //cout << "Entering stat_()\n";
-    Node* newNode = getNode("<stat>");
+    Node* newNode = getNode("<stat>", STAT);
     switch(tok.tk) {
         case LISTEN_tk: // in
             newNode->child1 = in_(file);
@@ -352,13 +352,13 @@ Node* stat_(fstream& file) {
         return newNode;
     } else parse_error();
 
-    return getNode("ERROR stat_()\n");
+    return getNode("ERROR stat_()\n", ERROR);
 }
 
 // <in> -> listen  Identifier
 Node* in_(fstream& file) {
     //cout << "Entering in_()\n";
-    Node* newNode = getNode("<in>");
+    Node* newNode = getNode("<in>", IN);
     if(tok.tk == LISTEN_tk) {
         //cout << "Found LISTEN_tk in in_()\n";
         newNode->tok1 = tok;
@@ -370,13 +370,13 @@ Node* in_(fstream& file) {
             return newNode;
         } else parse_error();
     } else parse_error();
-    return getNode("ERROR in_()\n");
+    return getNode("ERROR in_()\n", ERROR);
 }
 
 // <out> -> yell <expr>
 Node* out_(fstream& file) {
     //cout << "Entering out_()\n";
-    Node* newNode = getNode("<out>");
+    Node* newNode = getNode("<out>", OUT);
     if(tok.tk == YELL_tk) {
         //cout << "Found YELL_tk in out_()\n";
         newNode->tok1 = tok;
@@ -384,13 +384,13 @@ Node* out_(fstream& file) {
         newNode->child1 = expr_(file);
         return newNode;
     } else parse_error();
-    return getNode("ERROR out_()\n");
+    return getNode("ERROR out_()\n", ERROR);
 }
 
 // <if> -> if [ <expr> <RO> <expr> ] then <stat>
 Node* if_(fstream& file) {
     //cout << "Entering if_()\n";
-    Node* newNode = getNode("<if>");
+    Node* newNode = getNode("<if>", IF);
     if(tok.tk == IF_tk) {
         //cout << "Found IN_tk in if_()\n";
         newNode->tok1 = tok;
@@ -414,13 +414,13 @@ Node* if_(fstream& file) {
             } else parse_error();
         } else parse_error();
     } else parse_error();
-    return getNode("ERROR if_()\n");
+    return getNode("ERROR if_()\n", ERROR);
 }
 
 // <loop1> -> repeat  [ <expr> <RO> <expr> ]  <stat>
 Node* loop1_(fstream& file) {
     //cout << "Entering loop1_()\n";
-    Node* newNode = getNode("<loop1>");
+    Node* newNode = getNode("<loop1>", LOOP1);
     newNode->tok1.tk = REPEAT_tk;
     newNode->tok1.instance = "repeat";
     newNode->tok1.line = lineNumber;
@@ -438,14 +438,14 @@ Node* loop1_(fstream& file) {
             return newNode;
         } else parse_error();
     } else parse_error();
-    return getNode("ERROR loop1_()");
+    return getNode("ERROR loop1_()", ERROR);
 }
 
 // <loop2> -> repeat <stat> until [ <expr> <RO> <expr> ]
 Node* loop2_(fstream& file) {
     //cout << "Entering loop2_()\n";
     //cout << "Found REAPEAT_tk in loop2_()\n";
-    Node* newNode = getNode("<loop2>");
+    Node* newNode = getNode("<loop2>", LOOP2);
     newNode->tok1.tk = REPEAT_tk;
     newNode->tok1.instance = "repeat";
     newNode->tok1.line = lineNumber;
@@ -467,13 +467,13 @@ Node* loop2_(fstream& file) {
             } else parse_error();
         } else parse_error();
     } else parse_error();
-    return getNode("ERROR loop2_()\n");
+    return getNode("ERROR loop2_()\n", ERROR);
 }
 
 // <assign> -> assign Identifier  = <expr>
 Node* assign_(fstream& file) {
     //cout << "Entering assign_()\n";
-    Node* newNode = getNode("<assign>");
+    Node* newNode = getNode("<assign>", ASSIGN);
     if(tok.tk == ASSIGN_tk) {
         //cout << "Found ASSIGN_tk in assign_()\n";
         newNode->tok1 = tok;
@@ -492,7 +492,7 @@ Node* assign_(fstream& file) {
         } else parse_error();
     } else parse_error();
 
-    return getNode("ERROR assign_()\n");
+    return getNode("ERROR assign_()\n", ERROR);
 }
 
 /*enum tokenID {
@@ -508,7 +508,7 @@ Node* assign_(fstream& file) {
 // <RO> -> >=  | <= |  ==  |   ... (three tokens here) |  !=
 Node* R0_(fstream& file) {
     //cout << "Entering R0_()\n";
-    Node* newNode = getNode("<R0>");
+    Node* newNode = getNode("<R0>", R0);
     switch(tok.tk) {
         case GREAT_tk:
             //cout << "Found GREAT_tk in R0_()\n";
@@ -555,7 +555,7 @@ Node* R0_(fstream& file) {
 // <label> -> label Identifier
 Node* label_(fstream& file) {
     //cout << "Entering label_()\n";
-    Node* newNode = getNode("<label>");
+    Node* newNode = getNode("<label>", LABEL);
     if(tok.tk == LABEL_tk) {
         //cout << "Found LABEL_tk in label_()\n";
         newNode->tok1 = tok;
@@ -567,13 +567,13 @@ Node* label_(fstream& file) {
             return newNode;
         } else parse_error();
     } else parse_error();
-    return getNode("ERROR label_()\n");
+    return getNode("ERROR label_()\n", ERROR);
 }
 
 // <goto> ->  portal Identifier*/
 Node* goto_(fstream& file) {
     //cout << "Entering goto_()\n";
-    Node* newNode = getNode("<goto>");
+    Node* newNode = getNode("<goto>", GOTO);
     if(tok.tk == PORTAL_tk) {
         //cout << "Found PORTAL_tk in goto_()\n";
         newNode->tok1 = tok;
@@ -585,5 +585,5 @@ Node* goto_(fstream& file) {
             return newNode;
         } else parse_error();
     } else parse_error();
-    return getNode("ERROR goto_()\n");
+    return getNode("ERROR goto_()\n", ERROR);
 }

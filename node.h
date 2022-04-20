@@ -2,7 +2,11 @@
 #include "token.h"
 using namespace std;
 
+enum Label { PROGRAM, VARS, BLOCK, EXPR, N, A, M, R, STATS, MSTAT, STAT, IN, OUT,
+             IF, LOOP1, LOOP2, ASSIGN, R0, LABEL, GOTO, ERROR };
+
 struct Node {
+    Label code;
     string label;
     Node* child1;
     Node* child2;
@@ -15,4 +19,4 @@ struct Node {
     token tok5;
 };
 
-Node* getNode(string);
+Node* getNode(string, Label);
