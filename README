@@ -1,9 +1,11 @@
 Wilbert Hawley
 CS 4280
-4/7/22
-Project 2
+4/21/22
+Project 3
 
-This project simulates parsing for a compiler. The program takes in a program using the BNF provided in class. It will output a parse tree with labeled tokens.
+LOCAL OPTION
+
+This project simulates static semantics for a compiler. This program will check to make sure identifiers are properly declared.
 
 First you must compile the program using the following command (within the program folder):
 
@@ -11,7 +13,7 @@ First you must compile the program using the following command (within the progr
 
 To run the program, run the following command:
 
-    ./frontEnd [file]
+    ./statSem [file]
 
 Where file is an optional command. Without it, you can type a program in on the terminal or redirect your file. This assumes that file has the suffix ".sp2022".
 
@@ -20,8 +22,9 @@ To clean the folder, run the following command:
     make clean
 
 Some things of note:
-    - In the scanner project, I had trouble with the EOF tag for when you read directly from a file. That is not an issue in this project.
-    - I still struggled with the line number. I hope to iron that out soon.
-    - I tried to eliminate the left recursion in the <N> function but it lead to an error so I ended up switching the <N> and the <A> and it seems to be working. I left the code for the eliminated left recursion functions in there if you want to have a look (parser.cpp lines 165 - 189).
-    - I fixed the mixing up of left and right curly braces and brackets.
-    - I'm not sure if I have the indentation correct on this project.
+    - For some reason, my program can't pick up undeclared variables that around placed in parentheses [x: yell ( z ) ;] will not be recognized for some reason if z hasn't been declared.
+    - fixed space issue in parse tree
+    - fixed closing parentheses error
+    - fixed issue in N where i was assigning child1 twice
+    - fixed issue where an empty vars was stil returning a node
+    - fixed an error in where my loops weren't formatting correctly

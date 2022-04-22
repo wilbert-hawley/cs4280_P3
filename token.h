@@ -58,7 +58,8 @@ enum tokenID {
 struct token {
     tokenID tk;
     string instance;
-    float line;
+    int line;
+    int scope;
 };
 
 struct keyTokenPairs {

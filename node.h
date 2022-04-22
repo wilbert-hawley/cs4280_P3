@@ -1,3 +1,6 @@
+#ifndef NODE_H
+#define NODE_H
+
 #include <string>
 #include "token.h"
 using namespace std;
@@ -20,3 +23,5 @@ struct Node {
 };
 
 Node* getNode(string, Label);
+
+#endif

@@ -5,6 +5,7 @@
 #include "testscanner.h"
 #include "scanner.h"
 #include "parser.h"
+#include "semantic.h"
 using namespace std;
 
 int main(int argc, char** argv) {
@@ -40,8 +41,10 @@ int main(int argc, char** argv) {
     //testScanner(file);
 
     Node* root = parser(file);
-    printTree(root, 0);
+    //printTree(root, 0);
+    staticSem(root, 0, 0);
 
+    cout << "File " << filename + ".sp2022 " << "appears to conform to the rules.\n";
     file.close();
     return 0;
 }

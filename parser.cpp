@@ -45,7 +45,7 @@ void printTree(Node* tree, int depth) {
 }
 
 void parse_error() {
-    cout << "Error when processing TokenID: " << tokenNames[tok.tk] << " TokenInstance: "
+    cout << "PARSER:: Error when processing TokenID: " << tokenNames[tok.tk] << " TokenInstance: "
          << tok.instance << " LineNumber: " << tok.line << endl;
     exit(1);
 }
@@ -111,6 +111,7 @@ Node* vars_(fstream& file) {
         if(tok.tk == ID_tk) {
             //cout << "Found Identifier in vars()\n";
             newNode->tok2 = tok;
+            //cout << "PARSER:: token name ~" << tok.instance << "~ added to tree\n";
             tok = scanner(file, lineNumber, nextChar);
             if(tok.tk == COLEQU_tk) {
                 //cout << "Found colon equal in vars()\n";
@@ -133,7 +134,7 @@ Node* vars_(fstream& file) {
     }
     else {
         //cout << "Returning empty <vars>\n";
-        return newNode;
+        return NULL;
     }
     return getNode("ERROR vars_", ERROR);
 }
@@ -197,14 +198,14 @@ Node* N_(fstream& file) {
         //cout << "Found SLAHS_tk in N()\n";
         newNode->tok1 = tok;
         tok = scanner(file, lineNumber, nextChar);
-        newNode->child1 = N_(file);
+        newNode->child2 = N_(file);
         return newNode;
     }
     else if (tok.tk == PLUS_tk) {
         //cout << "Found PLUS_tk in N()\n";
         newNode->tok1 = tok;
         tok = scanner(file, lineNumber, nextChar);
-        newNode->child1 = N_(file);
+        newNode->child2 = N_(file);
         return newNode;
     } else
         return newNode;
@@ -256,6 +257,7 @@ Node* R_(fstream& file) {
     } else if(tok.tk == ID_tk) {
         //cout << "Found ID_tk in R_()\n";
         newNode->tok1 = tok;
+        //cout << "PARSER:: token name ~" << tok.instance << "~ added to tree\n";
         tok = scanner(file, lineNumber, nextChar);
         return newNode;
     } else if(tok.tk == NUM_tk) {
@@ -319,7 +321,7 @@ Node* stat_(fstream& file) {
             break;
         case LCURLY_tk: // block
             newNode->child1 = block_(file);
-            return NULL;
+            return newNode;
         case IF_tk: // if
             newNode->child1 = if_(file);
             break;
